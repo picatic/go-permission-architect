@@ -2,6 +2,7 @@ package models
 
 import (
   "fmt"
+  perm "github.com/picatic/go-permission-architect"
 )
 
 type Resource struct {
@@ -9,15 +10,15 @@ type Resource struct {
   identifier string
 }
 
-func NewResource(name string, identifier string) Resource {
-  return Resource{name, identifier}
+func NewResource(name string, identifier string) perm.Resource {
+  return &Resource{name, identifier}
 }
 
-func (r Resource) Name() string {
+func (r Resource) ResourceName() string {
   return r.name
 }
 
-func (r Resource) Identifier() string {
+func (r Resource) ResourceIdentifier() string {
   return r.identifier
 }
 
