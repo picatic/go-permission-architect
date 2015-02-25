@@ -38,6 +38,12 @@ func TestRoleProvider(t *testing.T) {
 			So(role.RoleProvider(), ShouldEqual, rp)
 		})
 
+		Convey("BestRole Failover", func() {
+			var roles []perm.Role
+			role := bestRole(rp, profile, resource, roles)
+			So(role.RoleName(), ShouldEqual, "guest")
+		})
+
 		Convey("String", func() {
 			So(fmt.Sprintf("%s", rp), ShouldEqual, "RoleProvider[User][Post]")
 		})

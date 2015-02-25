@@ -3,6 +3,7 @@ package permission
 import (
 	"log"
 	"os"
+	"errors"
 )
 
 //Session provides a named space to register your PermissionProviders and RoleProviders
@@ -44,11 +45,22 @@ func (s session) RoleProviders() []RoleProvider {
 	return s.roleProviders
 }
 
-func (s session) RegisterRoleProvider(roleProvider RoleProvider) {
+func (s *session) RegisterRoleProvider(roleProvider RoleProvider) error {
+	rp := s.RoleProviderFor(roleProvider.HandledProfileName(), roleProvider.HandledResourceName())
+	if (rp != nil) {
+		return errors.New("Cannot register duplicate RoleProvider")
+	}
 	s.roleProviders = append(s.roleProviders, roleProvider)
+	return nil
 }
 
 func (s session) RoleProviderFor(profileName string, resourceName string) RoleProvider {
+	for i := range s.roleProviders {
+  	if (s.roleProviders[i].HandledProfileName() == profileName &&
+  		s.roleProviders[i].HandledResourceName() == resourceName) {
+  		return s.roleProviders[i]
+  	}
+  }
 	return nil
 }
 
@@ -56,25 +68,42 @@ func (s session) PermissionProviders() []PermissionProvider {
 	return s.permissionProviders
 }
 
-func (s session) RegisterPermissionProvider(permissionProvider PermissionProvider) {
+func (s *session) RegisterPermissionProvider(permissionProvider PermissionProvider) error {
+	pp := s.PermissionProviderFor(permissionProvider.HandledResourceName())
+	if (pp != nil) {
+		return errors.New("Cannot register duplicate PermissionProvider")
+	}
 	s.permissionProviders = append(s.permissionProviders, permissionProvider)
-}
-
-func (s session) PermissionProviderFor(permission string) PermissionProvider {
 	return nil
 }
 
-func (s session) DefaultRole() Role {
+func (s session) PermissionProviderFor(resourceName string) PermissionProvider {
+	for i := range s.permissionProviders {
+		if (s.permissionProviders[i].HandledResourceName() == resourceName) {
+			return s.permissionProviders[i];
+		}
+	}
+	return nil
+}
+
+func (s session) DefaultRole(profile Profile, resource Resource) Role {
 	return s.defaultRole
 }
 
 //GetRole returns what role a Profile and Resource have
 func (s session) GetRole(profile Profile, resource Resource) Role {
-	return nil
+	roleProvider := s.RoleProviderFor(profile.ProfileName(), resource.ResourceName())
+	if (roleProvider == nil) {
+		return s.DefaultRole(profile, resource)
+	}
+	return roleProvider.BestRole(profile, resource)
 }
 
+//GetPermission
 func (s session) GetPermission(profile Profile, resource Resource, permission string) Permission {
-	return nil
+	role := s.GetRole(profile, resource)
+	permissionProvider := s.PermissionProviderFor(resource.ResourceName())
+	return permissionProvider.GetPermission(role, permission)
 }
 
 var sessions = map[string]Session{}

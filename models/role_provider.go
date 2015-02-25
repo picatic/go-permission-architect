@@ -26,10 +26,14 @@ func (rp *RoleProvider) AllRoles(p perm.Profile, r perm.Resource) []perm.Role {
 //BestRole returns the best role, usual the first Role from AllRoles
 func (rp *RoleProvider) BestRole(p perm.Profile, r perm.Resource) perm.Role {
 	roles := rp.AllRoles(p, r)
+	return bestRole(rp, p, r, roles)
+}
+
+func bestRole(roleProvider *RoleProvider, p perm.Profile, r perm.Resource, roles []perm.Role) perm.Role {
 	if (len(roles) >= 1) {
 		return roles[0]
 	} else {
-		return NewRole("guest", p, r, rp)	
+		return NewRole("guest", p, r, roleProvider)	
 	}
 }
 

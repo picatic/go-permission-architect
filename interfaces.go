@@ -7,19 +7,19 @@ import (
 type Session interface {
 	Name() string
 	SetName(name string) 
-	
+
 	RoleProviders() []RoleProvider
-	RegisterRoleProvider(roleProvider RoleProvider)
+	RegisterRoleProvider(roleProvider RoleProvider) error
 	RoleProviderFor(profileName string, resourceName string) RoleProvider
 
 	PermissionProviders() []PermissionProvider
-	RegisterPermissionProvider(permissionProvider PermissionProvider)
-	PermissionProviderFor(permission string) PermissionProvider
+	RegisterPermissionProvider(permissionProvider PermissionProvider) error
+	PermissionProviderFor(resourceName string) PermissionProvider
 
 	Logger() *log.Logger
 	SetLogger(logger *log.Logger)
 
-	DefaultRole() Role
+	DefaultRole(profile Profile, resource Resource) Role
 	GetRole(p Profile, r Resource) Role
 	GetPermission(p Profile, r Resource, permission string) Permission
 }
@@ -68,6 +68,6 @@ type Permission interface {
 
 //PermissionProvider
 type PermissionProvider interface {
-
-	GetPermission(permission string, role Role) Permission
+	HandledResourceName() string
+	GetPermission(role Role, permission string) Permission
 }

@@ -13,7 +13,7 @@ func TestPermission(t *testing.T) {
     resource := NewResource("Post", "2")
     roleProvider := NewRoleProvider("User", "Post")
     role := NewRole("guest", profile, resource, roleProvider)
-    permissionProvider := NewPermissionProvider()
+    permissionProvider := NewPermissionProvider("Post")
     p := NewPermission("read", true, role, permissionProvider)
 
     Convey("NewPermission", func() {
@@ -42,7 +42,7 @@ func TestPermission(t *testing.T) {
 
     Convey("SetRoleProvider", func() {
       p = NewPermission("read", true, role, permissionProvider)
-      permissionProvider := NewPermissionProvider()
+      permissionProvider := NewPermissionProvider("Post")
       p.SetPermissionProvider(permissionProvider)
       So(p.PermissionProvider(), ShouldEqual, permissionProvider)
     })
