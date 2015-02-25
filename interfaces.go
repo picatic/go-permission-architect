@@ -4,9 +4,10 @@ import (
 	"log"
 )
 
+//Session interface hooks up registering Providers and answering questions about Roles and Permissions
 type Session interface {
 	Name() string
-	SetName(name string) 
+	SetName(name string)
 
 	RoleProviders() []RoleProvider
 	RegisterRoleProvider(roleProvider RoleProvider) error

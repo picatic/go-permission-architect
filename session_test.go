@@ -6,7 +6,7 @@ import (
 )
 
 type mockRoleProvider struct {
-	profile string
+	profile  string
 	resource string
 }
 
@@ -43,7 +43,7 @@ func (pp mockPermissionProvider) GetPermission(role Role, permission string) Per
 //mockProfile
 type mockProfile struct {
 	name string
-	id string
+	id   string
 }
 
 func (p mockProfile) ProfileName() string {
@@ -57,7 +57,7 @@ func (p mockProfile) ProfileIdentifier() string {
 //mockResource
 type mockResource struct {
 	name string
-	id string
+	id   string
 }
 
 func (r mockResource) ResourceName() string {
@@ -69,9 +69,9 @@ func (r mockResource) ResourceIdentifier() string {
 
 //mockRole
 type mockRole struct {
-	name string
-	profile Profile
-	resource Resource
+	name         string
+	profile      Profile
+	resource     Resource
 	roleProvider RoleProvider
 }
 
@@ -105,9 +105,9 @@ func (r *mockRole) SetRoleProvider(roleProvider RoleProvider) {
 
 //mockPermission
 type mockPermission struct {
-	name string
-	granted bool
-	role Role
+	name               string
+	granted            bool
+	role               Role
 	permissionProvider PermissionProvider
 }
 
@@ -150,7 +150,7 @@ func TestSession(t *testing.T) {
 		})
 
 		Convey("Implements Session", func() {
-      So(s, ShouldImplement, (*Session)(nil))
+			So(s, ShouldImplement, (*Session)(nil))
 		})
 
 		Convey("RegisterRoleProvider", func() {

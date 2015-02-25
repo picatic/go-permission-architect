@@ -1,10 +1,10 @@
 package models
 
 import (
+	"fmt"
+	perm "github.com/picatic/go-permission-architect"
+	. "github.com/smartystreets/goconvey/convey"
 	"testing"
-  "fmt"
-  . "github.com/smartystreets/goconvey/convey"
-  perm "github.com/picatic/go-permission-architect"
 )
 
 func TestRoleProvider(t *testing.T) {
@@ -23,7 +23,7 @@ func TestRoleProvider(t *testing.T) {
 		})
 
 		Convey("AllRoles", func() {
-			roles := rp.AllRoles(profile, resource)			
+			roles := rp.AllRoles(profile, resource)
 			So(len(roles), ShouldEqual, 1)
 			role := roles[0]
 			So(role.Profile(), ShouldEqual, profile)
@@ -49,4 +49,3 @@ func TestRoleProvider(t *testing.T) {
 		})
 	})
 }
-

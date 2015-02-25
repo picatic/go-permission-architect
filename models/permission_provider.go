@@ -1,7 +1,7 @@
 package models
 
 import (
-  perm "github.com/picatic/go-permission-architect"
+	perm "github.com/picatic/go-permission-architect"
 )
 
 type PermissionProvider struct {
@@ -9,7 +9,7 @@ type PermissionProvider struct {
 }
 
 func NewPermissionProvider(resourceName string) perm.PermissionProvider {
-  return &PermissionProvider{resourceName}
+	return &PermissionProvider{resourceName}
 }
 
 func (pp PermissionProvider) HandledResourceName() string {
@@ -17,5 +17,5 @@ func (pp PermissionProvider) HandledResourceName() string {
 }
 
 func (pp *PermissionProvider) GetPermission(role perm.Role, permission string) perm.Permission {
-  return NewPermission(permission, false, role, pp)
+	return NewPermission(permission, false, role, pp)
 }

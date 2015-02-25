@@ -1,47 +1,58 @@
 package models
 
 import (
-  perm "github.com/picatic/go-permission-architect"
-  "fmt"
+	"fmt"
+	perm "github.com/picatic/go-permission-architect"
 )
 
+//Role represents a potential role between a Profile and Resource. There can be many possible roles for a given Profile and Resouce pairing
 type Role struct {
-  name string
-  profile perm.Profile
-  resource perm.Resource
-  roleProvider perm.RoleProvider
+	name         string
+	profile      perm.Profile
+	resource     perm.Resource
+	roleProvider perm.RoleProvider
 }
 
+//NewRole creates a new Role resource
 func NewRole(name string, profile perm.Profile, resource perm.Resource, roleProvider perm.RoleProvider) perm.Role {
-  return &Role{name, profile, resource, roleProvider}
+	return &Role{name, profile, resource, roleProvider}
 }
 
+//RoleName returns the name of this role
 func (r Role) RoleName() string {
-  return r.name
+	return r.name
 }
+
+//Profile returns the Profile resource used to create this Role
 func (r Role) Profile() perm.Profile {
-  return r.profile
+	return r.profile
 }
+
+//SetProfile sets the Profile resource
 func (r *Role) SetProfile(profile perm.Profile) {
-  r.profile = profile
+	r.profile = profile
 }
 
+//Resource returns the Resource model used to create this Role
 func (r Role) Resource() perm.Resource {
-  return r.resource
+	return r.resource
 }
 
+//SetResource sets the Resource model
 func (r *Role) SetResource(resource perm.Resource) {
-  r.resource = resource
+	r.resource = resource
 }
 
+//RoleProvider returns the provider that generated this Role
 func (r Role) RoleProvider() perm.RoleProvider {
-  return r.roleProvider
+	return r.roleProvider
 }
 
+//SetRoleProvider sets the RoleProvider
 func (r *Role) SetRoleProvider(roleProvider perm.RoleProvider) {
-  r.roleProvider = roleProvider
+	r.roleProvider = roleProvider
 }
 
 func (r Role) String() string {
-  return fmt.Sprintf("Role[%s]{%s %s}", r.name, r.profile, r.resource)
+	return fmt.Sprintf("Role[%s]{%s %s}", r.name, r.profile, r.resource)
 }
