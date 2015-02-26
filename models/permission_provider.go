@@ -8,7 +8,7 @@ type PermissionProvider struct {
 	resourceName string
 }
 
-func NewPermissionProvider(resourceName string) perm.PermissionProvider {
+func NewPermissionProvider(resourceName string) *PermissionProvider {
 	return &PermissionProvider{resourceName}
 }
 
