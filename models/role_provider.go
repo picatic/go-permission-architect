@@ -12,7 +12,7 @@ type RoleProvider struct {
 }
 
 //NewRoleProvider create a new RoleProvider that handles Profile and Resource by name
-func NewRoleProvider(profileName string, resourceName string) *RoleProvider {
+func NewRoleProvider(profileName string, resourceName string) perm.RoleProvider {
 	return &RoleProvider{profileName, resourceName}
 }
 
@@ -29,7 +29,7 @@ func (rp *RoleProvider) BestRole(p perm.Profile, r perm.Resource) perm.Role {
 	return bestRole(rp, p, r, roles)
 }
 
-func bestRole(roleProvider *RoleProvider, p perm.Profile, r perm.Resource, roles []perm.Role) perm.Role {
+func bestRole(roleProvider perm.RoleProvider, p perm.Profile, r perm.Resource, roles []perm.Role) perm.Role {
 	if len(roles) >= 1 {
 		return roles[0]
 	} else {

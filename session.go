@@ -126,6 +126,9 @@ func (s session) GetRole(profile Profile, resource Resource) Role {
 func (s session) GetPermission(profile Profile, resource Resource, permission string) Permission {
 	role := s.GetRole(profile, resource)
 	permissionProvider := s.PermissionProviderFor(resource.ResourceName())
+	if permissionProvider == nil {
+		return nil
+	}
 	return permissionProvider.GetPermission(role, permission)
 }
 
