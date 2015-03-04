@@ -40,7 +40,7 @@ func TestRoleProvider(t *testing.T) {
 
 		Convey("BestRole Failover", func() {
 			var roles []perm.Role
-			role := bestRole(rp, profile, resource, roles)
+			role := bestRoleWithRoles(rp, profile, resource, roles)
 			So(role.RoleName(), ShouldEqual, "guest")
 		})
 

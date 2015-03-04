@@ -48,12 +48,16 @@ type Role interface {
 	SetRoleProvider(RoleProvider)
 }
 
+type RoleProviderAllRoles func(roleProvider RoleProvider, p Profile, r Resource) []Role
+type RoleProviderBestRole func(ropeProvider RoleProvider, p Profile, r Resource) Role
 //RoleProvider provides an interface to ask what role or roles a Profile and Resource matching would have
 type RoleProvider interface {
 	HandledProfileName() string
 	HandledResourceName() string
-	AllRoles(p Profile, r Resource) []Role //Returns all the applicable roles a Profile and Resource could potentially have. Ordered by
+	AllRoles(profile Profile, resource Resource) []Role // (p Profile, r Resource) []Role //Returns all the applicable roles a Profile and Resource could potentially have. Ordered by
+	SetAllRoles(roleProviderAllRoles RoleProviderAllRoles)
 	BestRole(p Profile, r Resource) Role
+	SetBestRole(roleProviderBestRole RoleProviderBestRole)
 }
 
 //Permission represents the answer to "Does Role with Resource have this `permission`?"
@@ -67,8 +71,10 @@ type Permission interface {
 	SetPermissionProvider(PermissionProvider)
 }
 
+type PermissionProviderGetPermission func(permissionProvider PermissionProvider, role Role, permission string) Permission
 //PermissionProvider
 type PermissionProvider interface {
 	HandledResourceName() string
 	GetPermission(role Role, permission string) Permission
+	SetGetPermission(getPermission PermissionProviderGetPermission)
 }
