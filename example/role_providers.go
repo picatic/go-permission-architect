@@ -6,7 +6,7 @@ import (
 )
 
 type UserPostRoleProvider struct {
-	*models.RoleProvider
+	session.RoleProvider
 }
 
 func newUserPostRoleProvider() *UserPostRoleProvider {

@@ -23,8 +23,14 @@ func (rp mockRoleProvider) AllRoles(p Profile, r Resource) []Role {
 	// return roles
 	return []Role{&mockRole{"guest", p, r, rp}}
 }
+func (rp mockRoleProvider) SetAllRoles(roleProviderAllRoles RoleProviderAllRoles) {
+	
+}
 func (rp mockRoleProvider) BestRole(p Profile, r Resource) Role {
 	return &mockRole{"guest", p, r, rp}
+}
+func (rp mockRoleProvider) SetBestRole(roleProviderBestRole RoleProviderBestRole) {
+
 }
 
 //mockPermissionProvider
@@ -38,6 +44,9 @@ func (pp mockPermissionProvider) HandledResourceName() string {
 
 func (pp mockPermissionProvider) GetPermission(role Role, permission string) Permission {
 	return &mockPermission{permission, false, role, pp}
+}
+
+func (pp mockPermissionProvider) SetGetPermission(getPermission PermissionProviderGetPermission) {
 }
 
 //mockProfile
