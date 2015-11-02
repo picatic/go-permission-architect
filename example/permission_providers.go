@@ -18,7 +18,7 @@ func (ppp *PostPermissionProvider) GetPermission(role session.Role, permission s
 	if role.RoleName() == "admin" {
 		return models.NewPermission(permission, true, role, ppp), nil
 	} else {
-		return models.NewPermission(permission, true, role, ppp), nil
+		return models.NewPermission(permission, false, role, ppp), nil
 	}
 
 }
