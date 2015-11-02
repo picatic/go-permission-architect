@@ -74,6 +74,9 @@ func (s session) RoleProviderFor(profileName string, resourceName string) RolePr
 			return s.roleProviders[i]
 		}
 	}
+	if s.parent != nil {
+		return s.parent.RoleProviderFor(profileName, resourceName)
+	}
 	return nil
 }
 
@@ -98,6 +101,9 @@ func (s session) PermissionProviderFor(resourceName string) PermissionProvider {
 		if s.permissionProviders[i].HandledResourceName() == resourceName {
 			return s.permissionProviders[i]
 		}
+	}
+	if s.parent != nil {
+		return s.parent.PermissionProviderFor(resourceName)
 	}
 	return nil
 }

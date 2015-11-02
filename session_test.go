@@ -194,6 +194,21 @@ func TestSession(t *testing.T) {
 				rpdup := &mockRoleProvider{"User", "Post"}
 				So(s.RegisterRoleProvider(rpdup), ShouldNotBeNil)
 			})
+
+			Convey("With Child", func() {
+				child := s.NewSession("child")
+				rp2 := &mockRoleProvider{"User", "Comment"}
+				child.RegisterRoleProvider(rp2)
+				Convey("Looks at child level", func() {
+					r := child.RoleProviderFor("User", "Comment")
+					So(r, ShouldEqual, rp2)
+				})
+				Convey("It recurses to the parent", func() {
+					r := child.RoleProviderFor("User", "Post")
+					So(r, ShouldEqual, rp)
+				})
+
+			})
 		})
 
 		Convey("RegisterPermissionProvider", func() {
@@ -214,6 +229,21 @@ func TestSession(t *testing.T) {
 			Convey("Error on double registration", func() {
 				ppdup := &mockPermissionProvider{"Post"}
 				So(s.RegisterPermissionProvider(ppdup), ShouldNotBeNil)
+			})
+
+			Convey("With Child", func() {
+				child := s.NewSession("child")
+				pp2 := &mockPermissionProvider{"Comment"}
+				child.RegisterPermissionProvider(pp2)
+				Convey("Looks at child level", func() {
+					r := child.PermissionProviderFor("Comment")
+					So(r, ShouldEqual, pp2)
+				})
+				Convey("It recurses to the parent", func() {
+					r := child.PermissionProviderFor("Post")
+					So(r, ShouldEqual, pp)
+				})
+
 			})
 		})
 
