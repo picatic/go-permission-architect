@@ -47,6 +47,13 @@ func TestRoleProvider(t *testing.T) {
 			So(role.RoleName(), ShouldEqual, "guest")
 		})
 
+		Convey("Session", func() {
+			So(rp.Session(), ShouldBeNil)
+			s := perm.GetSession("test")
+			rp.SetSession(s)
+			So(rp.Session(), ShouldNotBeNil)
+		})
+
 		Convey("String", func() {
 			So(fmt.Sprintf("%s", rp), ShouldEqual, "RoleProvider[User][Post]")
 		})
