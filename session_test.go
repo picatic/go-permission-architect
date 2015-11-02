@@ -24,7 +24,7 @@ func (rp mockRoleProvider) AllRoles(p Profile, r Resource) []Role {
 	return []Role{&mockRole{"guest", p, r, rp}}
 }
 func (rp mockRoleProvider) SetAllRoles(roleProviderAllRoles RoleProviderAllRoles) {
-	
+
 }
 func (rp mockRoleProvider) BestRole(p Profile, r Resource) Role {
 	return &mockRole{"guest", p, r, rp}
@@ -160,6 +160,19 @@ func TestSession(t *testing.T) {
 
 		Convey("Implements Session", func() {
 			So(s, ShouldImplement, (*Session)(nil))
+		})
+
+		Convey("Context", func() {
+			ctx := map[string]interface{}{"cat": "awesome", "dog": "nice"}
+			Convey("Sets Context", func() {
+				s.SetContext(ctx)
+				So(s.Context(), ShouldEqual, ctx)
+			})
+		})
+
+		Convey("Parent", func() {
+			child := s.NewSession("child")
+			So(child.Parent(), ShouldEqual, s)
 		})
 
 		Convey("RegisterRoleProvider", func() {

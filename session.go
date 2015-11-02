@@ -14,6 +14,8 @@ type session struct {
 	permissionProviders []PermissionProvider // Registered PermissionProviders
 	defaultRoleFunc     DefaultRoleFunc      // Function that can resolve a default role
 	logger              *log.Logger          // Logger to use for errors/warnings/info
+	ctx                 interface{}          // A user assigned context for this session
+	parent              Session              // if not nil, this is the parent Session
 }
 
 type DefaultRoleFunc func(session Session, profile Profile, resource Resource) Role
@@ -130,6 +132,33 @@ func (s session) GetPermission(profile Profile, resource Resource, permission st
 		return nil
 	}
 	return permissionProvider.GetPermission(role, permission)
+}
+
+// SetContext for this Session
+func (s *session) SetContext(context interface{}) {
+	s.ctx = context
+}
+
+// Context get the context assigned to this Session
+func (s session) Context() interface{} {
+	return s.ctx
+}
+
+// NewSession as a child of this Session
+func (s *session) NewSession(name string) Session {
+	child := newSession(name)
+	child.SetParent(s)
+	return child
+}
+
+// SetParent of this Session
+func (s *session) SetParent(sess Session) {
+	s.parent = sess
+}
+
+// Parent of this Session
+func (s session) Parent() Session {
+	return s.parent
 }
 
 var sessions = map[string]Session{} //Singleton registry of Sessions
