@@ -8,6 +8,7 @@ import (
 type mockRoleProvider struct {
 	profile  string
 	resource string
+	session  Session
 }
 
 func (mp mockRoleProvider) HandledProfileName() string {
@@ -16,7 +17,7 @@ func (mp mockRoleProvider) HandledProfileName() string {
 func (mp mockRoleProvider) HandledResourceName() string {
 	return mp.resource
 }
-func (rp mockRoleProvider) AllRoles(p Profile, r Resource) []Role {
+func (rp *mockRoleProvider) AllRoles(p Profile, r Resource) []Role {
 	// var roles []Role
 	// role := &mockRole{"guest", p, r, rp}
 	// roles = append(roles, role)
@@ -24,29 +25,46 @@ func (rp mockRoleProvider) AllRoles(p Profile, r Resource) []Role {
 	return []Role{&mockRole{"guest", p, r, rp}}
 }
 func (rp mockRoleProvider) SetAllRoles(roleProviderAllRoles RoleProviderAllRoles) {
-	
+
 }
-func (rp mockRoleProvider) BestRole(p Profile, r Resource) Role {
+func (rp *mockRoleProvider) BestRole(p Profile, r Resource) Role {
 	return &mockRole{"guest", p, r, rp}
 }
 func (rp mockRoleProvider) SetBestRole(roleProviderBestRole RoleProviderBestRole) {
 
 }
 
+func (rp *mockRoleProvider) SetSession(sess Session) {
+	rp.session = sess
+}
+
+func (rp mockRoleProvider) Session() Session {
+	return rp.session
+}
+
 //mockPermissionProvider
 type mockPermissionProvider struct {
 	resource string
+	session  Session
 }
 
 func (pp mockPermissionProvider) HandledResourceName() string {
 	return pp.resource
 }
 
-func (pp mockPermissionProvider) GetPermission(role Role, permission string) Permission {
+func (pp *mockPermissionProvider) GetPermission(role Role, permission string) Permission {
 	return &mockPermission{permission, false, role, pp}
 }
 
 func (pp mockPermissionProvider) SetGetPermission(getPermission PermissionProviderGetPermission) {
+}
+
+func (pp *mockPermissionProvider) SetSession(sess Session) {
+	pp.session = sess
+}
+
+func (pp mockPermissionProvider) Session() Session {
+	return pp.session
 }
 
 //mockProfile
@@ -163,7 +181,7 @@ func TestSession(t *testing.T) {
 		})
 
 		Convey("RegisterRoleProvider", func() {
-			rp := &mockRoleProvider{"User", "Post"}
+			rp := &mockRoleProvider{"User", "Post", nil}
 			s.RegisterRoleProvider(rp)
 			So(s.RoleProviders(), ShouldContain, rp)
 
@@ -178,13 +196,17 @@ func TestSession(t *testing.T) {
 			})
 
 			Convey("Error on double registration", func() {
-				rpdup := &mockRoleProvider{"User", "Post"}
+				rpdup := &mockRoleProvider{"User", "Post", nil}
 				So(s.RegisterRoleProvider(rpdup), ShouldNotBeNil)
+			})
+
+			Convey("Has reference to session", func() {
+				So(s.RoleProviderFor("User", "Post").Session(), ShouldEqual, s)
 			})
 		})
 
 		Convey("RegisterPermissionProvider", func() {
-			pp := &mockPermissionProvider{"Post"}
+			pp := &mockPermissionProvider{"Post", nil}
 			s.RegisterPermissionProvider(pp)
 			So(s.PermissionProviders(), ShouldContain, pp)
 
@@ -199,15 +221,20 @@ func TestSession(t *testing.T) {
 			})
 
 			Convey("Error on double registration", func() {
-				ppdup := &mockPermissionProvider{"Post"}
+				ppdup := &mockPermissionProvider{"Post", nil}
 				So(s.RegisterPermissionProvider(ppdup), ShouldNotBeNil)
+			})
+			Convey("Has reference to session", func() {
+				sess := s.PermissionProviderFor("Post").Session()
+				So(sess, ShouldNotBeNil)
+				So(sess, ShouldEqual, s)
 			})
 		})
 
 		Convey("GetRole", func() {
 			profile := &mockProfile{"User", "1"}
 			resource := &mockResource{"Post", "1"}
-			roleProvider := &mockRoleProvider{"User", "Post"}
+			roleProvider := &mockRoleProvider{"User", "Post", nil}
 			s.RegisterRoleProvider(roleProvider)
 			role := s.GetRole(profile, resource)
 			So(role.RoleName(), ShouldEqual, "guest")
@@ -216,9 +243,9 @@ func TestSession(t *testing.T) {
 		Convey("GetPermission", func() {
 			profile := &mockProfile{"User", "1"}
 			resource := &mockResource{"Post", "1"}
-			roleProvider := &mockRoleProvider{"User", "Post"}
+			roleProvider := &mockRoleProvider{"User", "Post", nil}
 			s.RegisterRoleProvider(roleProvider)
-			permissionProvider := &mockPermissionProvider{"Post"}
+			permissionProvider := &mockPermissionProvider{"Post", nil}
 			s.RegisterPermissionProvider(permissionProvider)
 
 			permission := s.GetPermission(profile, resource, "create")

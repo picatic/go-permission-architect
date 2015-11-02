@@ -5,8 +5,9 @@ import (
 )
 
 type PermissionProvider struct {
-	resourceName string
+	resourceName  string
 	getPermission perm.PermissionProviderGetPermission
+	session       perm.Session
 }
 
 func NewPermissionProvider(resourceName string) *PermissionProvider {
@@ -26,6 +27,14 @@ func (pp *PermissionProvider) GetPermission(role perm.Role, permission string) p
 
 func (pp *PermissionProvider) SetGetPermission(permissionProviderGetPermission perm.PermissionProviderGetPermission) {
 	pp.getPermission = permissionProviderGetPermission
+}
+
+func (pp *PermissionProvider) SetSession(sess perm.Session) {
+	pp.session = sess
+}
+
+func (pp PermissionProvider) Session() perm.Session {
+	return pp.session
 }
 
 func getPermission(permissionProvider perm.PermissionProvider, role perm.Role, permission string) perm.Permission {
