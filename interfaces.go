@@ -23,6 +23,13 @@ type Session interface {
 	DefaultRole(profile Profile, resource Resource) Role
 	GetRole(p Profile, r Resource) Role
 	GetPermission(p Profile, r Resource, permission string) Permission
+
+	SetContext(context interface{})
+	Context() interface{}
+
+	NewSession(name string) Session
+	SetParent(sess Session)
+	Parent() Session
 }
 
 //Profile interface represents a requesting user, group, organizational unit, etc.
@@ -50,6 +57,7 @@ type Role interface {
 
 type RoleProviderAllRoles func(roleProvider RoleProvider, p Profile, r Resource) []Role
 type RoleProviderBestRole func(ropeProvider RoleProvider, p Profile, r Resource) Role
+
 //RoleProvider provides an interface to ask what role or roles a Profile and Resource matching would have
 type RoleProvider interface {
 	HandledProfileName() string
@@ -72,6 +80,7 @@ type Permission interface {
 }
 
 type PermissionProviderGetPermission func(permissionProvider PermissionProvider, role Role, permission string) Permission
+
 //PermissionProvider
 type PermissionProvider interface {
 	HandledResourceName() string
