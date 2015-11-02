@@ -66,6 +66,8 @@ type RoleProvider interface {
 	SetAllRoles(roleProviderAllRoles RoleProviderAllRoles)
 	BestRole(p Profile, r Resource) Role
 	SetBestRole(roleProviderBestRole RoleProviderBestRole)
+	SetSession(sess Session)
+	Session() Session
 }
 
 //Permission represents the answer to "Does Role with Resource have this `permission`?"
@@ -86,4 +88,6 @@ type PermissionProvider interface {
 	HandledResourceName() string
 	GetPermission(role Role, permission string) Permission
 	SetGetPermission(getPermission PermissionProviderGetPermission)
+	SetSession(sess Session)
+	Session() Session
 }

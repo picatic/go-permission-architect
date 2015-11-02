@@ -62,6 +62,7 @@ func (s *session) RegisterRoleProvider(roleProvider RoleProvider) error {
 	if rp != nil {
 		return errors.New("Cannot register duplicate RoleProvider")
 	}
+	roleProvider.SetSession(s)
 	s.roleProviders = append(s.roleProviders, roleProvider)
 	return nil
 }
@@ -91,6 +92,7 @@ func (s *session) RegisterPermissionProvider(permissionProvider PermissionProvid
 	if pp != nil {
 		return errors.New("Cannot register duplicate PermissionProvider")
 	}
+	permissionProvider.SetSession(s)
 	s.permissionProviders = append(s.permissionProviders, permissionProvider)
 	return nil
 }

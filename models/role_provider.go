@@ -9,8 +9,9 @@ import (
 type RoleProvider struct {
 	handledProfileName  string
 	handledResourceName string
-	allRoles perm.RoleProviderAllRoles
-	bestRole perm.RoleProviderBestRole
+	allRoles            perm.RoleProviderAllRoles
+	bestRole            perm.RoleProviderBestRole
+	session             perm.Session
 }
 
 //NewRoleProvider create a new RoleProvider that handles Profile and Resource by name
@@ -43,7 +44,7 @@ func (rp *RoleProvider) BestRole(p perm.Profile, r perm.Resource) perm.Role {
 	return rp.bestRole(rp, p, r)
 }
 
-func bestRole(roleProvider perm.RoleProvider, p perm.Profile, r perm.Resource, ) perm.Role {
+func bestRole(roleProvider perm.RoleProvider, p perm.Profile, r perm.Resource) perm.Role {
 	roles := roleProvider.AllRoles(p, r)
 	return bestRoleWithRoles(roleProvider, p, r, roles)
 }
@@ -73,4 +74,14 @@ func (rp *RoleProvider) HandledResourceName() string {
 //String makes a pretty string
 func (rp RoleProvider) String() string {
 	return fmt.Sprintf("RoleProvider[%s][%s]", rp.handledProfileName, rp.handledResourceName)
+}
+
+//SetSession sets the Session on this RoleProvider
+func (rp *RoleProvider) SetSession(sess perm.Session) {
+	rp.session = sess
+}
+
+//Session returns the Session this RoleProvider was initialized with
+func (rp RoleProvider) Session() perm.Session {
+	return rp.session
 }
