@@ -23,6 +23,13 @@ type Session interface {
 	DefaultRole(profile Profile, resource Resource) Role
 	GetRole(p Profile, r Resource) Role
 	GetPermission(p Profile, r Resource, permission string) Permission
+
+	SetContext(context interface{})
+	Context() interface{}
+
+	NewSession(name string) Session
+	SetParent(sess Session)
+	Parent() Session
 }
 
 //Profile interface represents a requesting user, group, organizational unit, etc.
