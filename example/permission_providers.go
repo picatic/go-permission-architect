@@ -14,13 +14,13 @@ func newPostPermissionProvider() *PostPermissionProvider {
 	return ppp
 }
 
-func (ppp *PostPermissionProvider) GetPermission(role session.Role, permission string) session.Permission {
+func (ppp *PostPermissionProvider) GetPermission(role session.Role, permission string) (session.Permission, error) {
 	if role.RoleName() == "admin" {
-		return models.NewPermission(permission, true, role, ppp)
+		return models.NewPermission(permission, true, role, ppp), nil
 	} else {
-		return models.NewPermission(permission, true, role, ppp) 
+		return models.NewPermission(permission, false, role, ppp), nil
 	}
-	
+
 }
 
 func init() {

@@ -1,6 +1,7 @@
 package permission
 
 import (
+	"errors"
 	. "github.com/smartystreets/goconvey/convey"
 	"testing"
 )
@@ -17,18 +18,21 @@ func (mp mockRoleProvider) HandledProfileName() string {
 func (mp mockRoleProvider) HandledResourceName() string {
 	return mp.resource
 }
-func (rp *mockRoleProvider) AllRoles(p Profile, r Resource) []Role {
+func (rp *mockRoleProvider) AllRoles(p Profile, r Resource) ([]Role, error) {
 	// var roles []Role
 	// role := &mockRole{"guest", p, r, rp}
 	// roles = append(roles, role)
 	// return roles
-	return []Role{&mockRole{"guest", p, r, rp}}
+	return []Role{&mockRole{"guest", p, r, rp}}, nil
 }
 func (rp mockRoleProvider) SetAllRoles(roleProviderAllRoles RoleProviderAllRoles) {
 
 }
-func (rp *mockRoleProvider) BestRole(p Profile, r Resource) Role {
-	return &mockRole{"guest", p, r, rp}
+func (rp *mockRoleProvider) BestRole(p Profile, r Resource) (Role, error) {
+	if p.ProfileIdentifier() == "1" {
+		return &mockRole{"guest", p, r, rp}, nil
+	}
+	return nil, errors.New("Mock Best Role Error")
 }
 func (rp mockRoleProvider) SetBestRole(roleProviderBestRole RoleProviderBestRole) {
 
@@ -52,8 +56,11 @@ func (pp mockPermissionProvider) HandledResourceName() string {
 	return pp.resource
 }
 
-func (pp *mockPermissionProvider) GetPermission(role Role, permission string) Permission {
-	return &mockPermission{permission, false, role, pp}
+func (pp *mockPermissionProvider) GetPermission(role Role, permission string) (Permission, error) {
+	if permission == "create" {
+		return &mockPermission{permission, false, role, pp}, nil
+	}
+	return nil, errors.New("Mock Get Permission Error")
 }
 
 func (pp mockPermissionProvider) SetGetPermission(getPermission PermissionProviderGetPermission) {
@@ -199,34 +206,43 @@ func TestSession(t *testing.T) {
 			So(s.RoleProviders(), ShouldContain, rp)
 
 			Convey("RoleProviderFor", func() {
-				r := s.RoleProviderFor("User", "Post")
+				r, err := s.RoleProviderFor("User", "Post")
+				So(err, ShouldBeNil)
 				So(r, ShouldEqual, rp)
 			})
 
 			Convey("RoleProviderFor error", func() {
-				r := s.RoleProviderFor("Group", "Post")
+				r, err := s.RoleProviderFor("Group", "Post")
+				So(r, ShouldBeNil)
+				So(err, ShouldNotBeNil)
+				So(err, ShouldHaveSameTypeAs, &RoleProviderNotFoundError{})
+
 				So(r, ShouldBeNil)
 			})
 
 			Convey("Error on double registration", func() {
 				rpdup := &mockRoleProvider{"User", "Post", nil}
+				err := s.RegisterRoleProvider(rpdup)
+				So(err, ShouldNotBeNil)
+				So(err, ShouldHaveSameTypeAs, &DuplicateRoleProviderError{})
 				So(s.RegisterRoleProvider(rpdup), ShouldNotBeNil)
 			})
 
 			Convey("Has reference to session", func() {
-				So(s.RoleProviderFor("User", "Post").Session(), ShouldEqual, s)
+				rp, _ := s.RoleProviderFor("User", "Post")
+				So(rp.Session(), ShouldEqual, s)
 			})
 
 			Convey("With Child", func() {
 				child := s.NewSession("child")
-				rp2 := &mockRoleProvider{"User", "Comment"}
+				rp2 := &mockRoleProvider{"User", "Comment", nil}
 				child.RegisterRoleProvider(rp2)
 				Convey("Looks at child level", func() {
-					r := child.RoleProviderFor("User", "Comment")
+					r, _ := child.RoleProviderFor("User", "Comment")
 					So(r, ShouldEqual, rp2)
 				})
 				Convey("It recurses to the parent", func() {
-					r := child.RoleProviderFor("User", "Post")
+					r, _ := child.RoleProviderFor("User", "Post")
 					So(r, ShouldEqual, rp)
 				})
 
@@ -239,36 +255,45 @@ func TestSession(t *testing.T) {
 			So(s.PermissionProviders(), ShouldContain, pp)
 
 			Convey("PermissionProviderFor", func() {
-				p := s.PermissionProviderFor("Post")
+				p, err := s.PermissionProviderFor("Post")
 				So(p, ShouldEqual, pp)
+				So(err, ShouldBeNil)
 			})
 
 			Convey("PermissionProviderFor error", func() {
-				p := s.PermissionProviderFor("Comment")
+				p, err := s.PermissionProviderFor("Comment")
 				So(p, ShouldBeNil)
+				So(err, ShouldNotBeNil)
+				So(err, ShouldHaveSameTypeAs, &PermissionProviderNotFoundError{})
 			})
 
 			Convey("Error on double registration", func() {
 				ppdup := &mockPermissionProvider{"Post", nil}
-				So(s.RegisterPermissionProvider(ppdup), ShouldNotBeNil)
+				err := s.RegisterPermissionProvider(ppdup)
+				So(err, ShouldNotBeNil)
+				So(err, ShouldHaveSameTypeAs, &DuplicatePermissionProviderError{})
 			})
 
 			Convey("Has reference to session", func() {
-				sess := s.PermissionProviderFor("Post").Session()
+				pp, err := s.PermissionProviderFor("Post")
+				So(err, ShouldBeNil)
+				sess := pp.Session()
 				So(sess, ShouldNotBeNil)
 				So(sess, ShouldEqual, s)
 			})
 
 			Convey("With Child", func() {
 				child := s.NewSession("child")
-				pp2 := &mockPermissionProvider{"Comment"}
+				pp2 := &mockPermissionProvider{"Comment", nil}
 				child.RegisterPermissionProvider(pp2)
 				Convey("Looks at child level", func() {
-					r := child.PermissionProviderFor("Comment")
+					r, err := child.PermissionProviderFor("Comment")
+					So(err, ShouldBeNil)
 					So(r, ShouldEqual, pp2)
 				})
 				Convey("It recurses to the parent", func() {
-					r := child.PermissionProviderFor("Post")
+					r, err := child.PermissionProviderFor("Post")
+					So(err, ShouldBeNil)
 					So(r, ShouldEqual, pp)
 				})
 			})
@@ -279,8 +304,26 @@ func TestSession(t *testing.T) {
 			resource := &mockResource{"Post", "1"}
 			roleProvider := &mockRoleProvider{"User", "Post", nil}
 			s.RegisterRoleProvider(roleProvider)
-			role := s.GetRole(profile, resource)
-			So(role.RoleName(), ShouldEqual, "guest")
+			Convey("When found", func() {
+				role, err := s.GetRole(profile, resource)
+				So(role.RoleName(), ShouldEqual, "guest")
+				So(err, ShouldBeNil)
+			})
+
+			Convey("When not found", func() {
+				profile.name = "Taco"
+				role, err := s.GetRole(profile, resource)
+				So(role, ShouldBeNil)
+				So(err, ShouldNotBeNil)
+			})
+
+			Convey("Passes along error from RoleProvider", func() {
+				profile.id = "2"
+				role, err := s.GetRole(profile, resource)
+				So(role, ShouldBeNil)
+				So(err, ShouldNotBeNil)
+			})
+
 		})
 
 		Convey("GetPermission", func() {
@@ -290,9 +333,45 @@ func TestSession(t *testing.T) {
 			s.RegisterRoleProvider(roleProvider)
 			permissionProvider := &mockPermissionProvider{"Post", nil}
 			s.RegisterPermissionProvider(permissionProvider)
+			Convey("When Found", func() {
+				permission, err := s.GetPermission(profile, resource, "create")
+				So(err, ShouldBeNil)
+				So(permission.PermissionName(), ShouldEqual, "create")
+			})
 
-			permission := s.GetPermission(profile, resource, "create")
-			So(permission.PermissionName(), ShouldEqual, "create")
+			Convey("When not found", func() {
+				resource.name = "Comment"
+				permission, err := s.GetPermission(profile, resource, "create")
+				So(err, ShouldNotBeNil)
+				So(permission, ShouldBeNil)
+			})
+
+			Convey("Passes along error from PermissionProvider", func() {
+				permission, err := s.GetPermission(profile, resource, "read")
+				So(err, ShouldNotBeNil)
+				So(err.Error(), ShouldEqual, "Mock Get Permission Error")
+				So(permission, ShouldBeNil)
+			})
+
+		})
+
+		Convey("DefaultRole", func() {
+			profile := &mockProfile{"User", "1"}
+			resource := &mockResource{"Post", "1"}
+			Convey("Error if not set", func() {
+				role, err := s.DefaultRole(profile, resource)
+				So(role, ShouldBeNil)
+				So(err, ShouldNotBeNil)
+				So(err, ShouldEqual, DefaultRoleNotSetError)
+			})
+			Convey("Execs Provided function", func() {
+				s.SetDefaultRole(func(session Session, profile Profile, resource Resource) (Role, error) {
+					return nil, errors.New("Nope")
+				})
+				role, err := s.DefaultRole(profile, resource)
+				So(role, ShouldBeNil)
+				So(err.Error(), ShouldEqual, "Nope")
+			})
 		})
 	})
 }

@@ -10,18 +10,18 @@ type UserPostRoleProvider struct {
 }
 
 func newUserPostRoleProvider() *UserPostRoleProvider {
-	rp := &UserPostRoleProvider{models.NewRoleProvider("User","Post")}
+	rp := &UserPostRoleProvider{models.NewRoleProvider("User", "Post")}
 	return rp
 }
 
-func (rp UserPostRoleProvider) AllRoles(profile session.Profile, resource session.Resource) []session.Role {
+func (rp UserPostRoleProvider) AllRoles(profile session.Profile, resource session.Resource) ([]session.Role, error) {
 	var roles []session.Role
 	if profile.ProfileIdentifier() == "1" {
 		roles = append(roles, models.NewRole("admin", profile, resource, rp))
 	} else {
 		roles = append(roles, models.NewRole("guest", profile, resource, rp))
 	}
-	return roles
+	return roles, nil
 }
 
 func init() {
