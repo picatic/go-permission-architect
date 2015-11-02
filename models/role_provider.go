@@ -25,14 +25,14 @@ func NewRoleProvider(profileName string, resourceName string) perm.RoleProvider 
 }
 
 //AllRoles returns all applicable roles, but this implementation just returns one role of guest
-func (rp *RoleProvider) AllRoles(profile perm.Profile, resource perm.Resource) []perm.Role {
+func (rp *RoleProvider) AllRoles(profile perm.Profile, resource perm.Resource) ([]perm.Role, error) {
 	return rp.allRoles(rp, profile, resource)
 }
 
-func allRoles(rp perm.RoleProvider, profile perm.Profile, resource perm.Resource) []perm.Role {
+func allRoles(rp perm.RoleProvider, profile perm.Profile, resource perm.Resource) ([]perm.Role, error) {
 	var roles []perm.Role
 	roles = append(roles, NewRole("guest", profile, resource, rp))
-	return roles
+	return roles, nil
 }
 
 func (rp *RoleProvider) SetAllRoles(roleProviderAllRoles perm.RoleProviderAllRoles) {
@@ -40,20 +40,23 @@ func (rp *RoleProvider) SetAllRoles(roleProviderAllRoles perm.RoleProviderAllRol
 }
 
 //BestRole returns the best role, usual the first Role from AllRoles
-func (rp *RoleProvider) BestRole(p perm.Profile, r perm.Resource) perm.Role {
+func (rp *RoleProvider) BestRole(p perm.Profile, r perm.Resource) (perm.Role, error) {
 	return rp.bestRole(rp, p, r)
 }
 
-func bestRole(roleProvider perm.RoleProvider, p perm.Profile, r perm.Resource) perm.Role {
-	roles := roleProvider.AllRoles(p, r)
+func bestRole(roleProvider perm.RoleProvider, p perm.Profile, r perm.Resource) (perm.Role, error) {
+	roles, err := roleProvider.AllRoles(p, r)
+	if err != nil {
+		return nil, err
+	}
 	return bestRoleWithRoles(roleProvider, p, r, roles)
 }
 
-func bestRoleWithRoles(roleProvider perm.RoleProvider, p perm.Profile, r perm.Resource, roles []perm.Role) perm.Role {
+func bestRoleWithRoles(roleProvider perm.RoleProvider, p perm.Profile, r perm.Resource, roles []perm.Role) (perm.Role, error) {
 	if len(roles) >= 1 {
-		return roles[0]
+		return roles[0], nil
 	} else {
-		return NewRole("guest", p, r, roleProvider)
+		return NewRole("guest", p, r, roleProvider), nil
 	}
 }
 

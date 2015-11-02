@@ -21,7 +21,7 @@ func (pp PermissionProvider) HandledResourceName() string {
 	return pp.resourceName
 }
 
-func (pp *PermissionProvider) GetPermission(role perm.Role, permission string) perm.Permission {
+func (pp *PermissionProvider) GetPermission(role perm.Role, permission string) (perm.Permission, error) {
 	return pp.getPermission(pp, role, permission)
 }
 
@@ -37,6 +37,6 @@ func (pp PermissionProvider) Session() perm.Session {
 	return pp.session
 }
 
-func getPermission(permissionProvider perm.PermissionProvider, role perm.Role, permission string) perm.Permission {
-	return NewPermission(permission, false, role, permissionProvider)
+func getPermission(permissionProvider perm.PermissionProvider, role perm.Role, permission string) (perm.Permission, error) {
+	return NewPermission(permission, false, role, permissionProvider), nil
 }

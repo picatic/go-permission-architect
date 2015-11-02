@@ -23,7 +23,8 @@ func TestPermissionProvider(t *testing.T) {
 		})
 
 		Convey("GetPermission", func() {
-			p := pp.GetPermission(role, "ducks")
+			p, err := pp.GetPermission(role, "ducks")
+			So(err, ShouldBeNil)
 			So(p.PermissionName(), ShouldEqual, "ducks")
 			So(p.Granted(), ShouldBeFalse)
 			So(p.Role(), ShouldEqual, role)

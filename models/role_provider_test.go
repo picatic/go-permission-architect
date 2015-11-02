@@ -23,7 +23,8 @@ func TestRoleProvider(t *testing.T) {
 		})
 
 		Convey("AllRoles", func() {
-			roles := rp.AllRoles(profile, resource)
+			roles, err := rp.AllRoles(profile, resource)
+			So(err, ShouldBeNil)
 			So(len(roles), ShouldEqual, 1)
 			role := roles[0]
 			So(role.Profile(), ShouldEqual, profile)
@@ -32,7 +33,8 @@ func TestRoleProvider(t *testing.T) {
 		})
 
 		Convey("BestRole", func() {
-			role := rp.BestRole(profile, resource)
+			role, err := rp.BestRole(profile, resource)
+			So(err, ShouldBeNil)
 			So(role.Profile(), ShouldEqual, profile)
 			So(role.Resource(), ShouldEqual, resource)
 			So(role.RoleProvider(), ShouldEqual, rp)
@@ -40,7 +42,8 @@ func TestRoleProvider(t *testing.T) {
 
 		Convey("BestRole Failover", func() {
 			var roles []perm.Role
-			role := bestRoleWithRoles(rp, profile, resource, roles)
+			role, err := bestRoleWithRoles(rp, profile, resource, roles)
+			So(err, ShouldBeNil)
 			So(role.RoleName(), ShouldEqual, "guest")
 		})
 

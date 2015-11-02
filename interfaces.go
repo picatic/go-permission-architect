@@ -11,18 +11,19 @@ type Session interface {
 
 	RoleProviders() []RoleProvider
 	RegisterRoleProvider(roleProvider RoleProvider) error
-	RoleProviderFor(profileName string, resourceName string) RoleProvider
+	RoleProviderFor(profileName string, resourceName string) (RoleProvider, error)
 
 	PermissionProviders() []PermissionProvider
 	RegisterPermissionProvider(permissionProvider PermissionProvider) error
-	PermissionProviderFor(resourceName string) PermissionProvider
+	PermissionProviderFor(resourceName string) (PermissionProvider, error)
 
 	Logger() *log.Logger
 	SetLogger(logger *log.Logger)
 
-	DefaultRole(profile Profile, resource Resource) Role
-	GetRole(p Profile, r Resource) Role
-	GetPermission(p Profile, r Resource, permission string) Permission
+	DefaultRole(profile Profile, resource Resource) (Role, error)
+	SetDefaultRole(fn DefaultRoleFunc)
+	GetRole(p Profile, r Resource) (Role, error)
+	GetPermission(p Profile, r Resource, permission string) (Permission, error)
 
 	SetContext(context interface{})
 	Context() interface{}
@@ -55,16 +56,16 @@ type Role interface {
 	SetRoleProvider(RoleProvider)
 }
 
-type RoleProviderAllRoles func(roleProvider RoleProvider, p Profile, r Resource) []Role
-type RoleProviderBestRole func(ropeProvider RoleProvider, p Profile, r Resource) Role
+type RoleProviderAllRoles func(roleProvider RoleProvider, p Profile, r Resource) ([]Role, error)
+type RoleProviderBestRole func(ropeProvider RoleProvider, p Profile, r Resource) (Role, error)
 
 //RoleProvider provides an interface to ask what role or roles a Profile and Resource matching would have
 type RoleProvider interface {
 	HandledProfileName() string
 	HandledResourceName() string
-	AllRoles(profile Profile, resource Resource) []Role // (p Profile, r Resource) []Role //Returns all the applicable roles a Profile and Resource could potentially have. Ordered by
+	AllRoles(profile Profile, resource Resource) ([]Role, error) // (p Profile, r Resource) []Role //Returns all the applicable roles a Profile and Resource could potentially have. Ordered by
 	SetAllRoles(roleProviderAllRoles RoleProviderAllRoles)
-	BestRole(p Profile, r Resource) Role
+	BestRole(p Profile, r Resource) (Role, error)
 	SetBestRole(roleProviderBestRole RoleProviderBestRole)
 	SetSession(sess Session)
 	Session() Session
@@ -81,12 +82,12 @@ type Permission interface {
 	SetPermissionProvider(PermissionProvider)
 }
 
-type PermissionProviderGetPermission func(permissionProvider PermissionProvider, role Role, permission string) Permission
+type PermissionProviderGetPermission func(permissionProvider PermissionProvider, role Role, permission string) (Permission, error)
 
 //PermissionProvider
 type PermissionProvider interface {
 	HandledResourceName() string
-	GetPermission(role Role, permission string) Permission
+	GetPermission(role Role, permission string) (Permission, error)
 	SetGetPermission(getPermission PermissionProviderGetPermission)
 	SetSession(sess Session)
 	Session() Session
